@@ -2,6 +2,7 @@ from __future__ import annotations
 from typing import List, NamedTuple, Callable, Tuple
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
+from matplotlib.axes import Axes
 import numpy as np
 from numba import njit
 import copy
@@ -113,8 +114,9 @@ if __name__ == "__main__":
     ax.set_ylabel("p")
     fig.show()
 
+    ax: Axes
     fig,ax = plt.subplots(1,1)
-    ax.plot(b_ls, avg_pressures)
+    ax.loglog(b_ls, avg_pressures)
     ax.set_xlabel("L")
     ax.set_ylabel("p")
     plt.show()
