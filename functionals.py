@@ -5,7 +5,7 @@ import numpy as np
 import copy
 
 k_b = 1.38e-23
-T = 298
+T = 100
 beta = 1 / (k_b * T)
 
 box_k = 3*k_b*T
@@ -16,7 +16,7 @@ hardcore_pot = 1000 * k_b * T
 
 jump_scale = 0.04
 
-N = 400
+N = 100
 
 
 
@@ -51,8 +51,9 @@ class System:
             self.state = proposed_next
 
     def pressure(self) -> float:
-        pressure_contrib = np.sum(box_k*self.state*self.L*np.where(self.state < 0, self.state, 0)) \
-            + np.sum(box_k*(self.state-self.L)*np.where(self.state > self.L, self.state, 0))
+        pressure_contrib = np.sum(self.L*np.where(self.state < 0, -self.state, 0)) \
+                         + np.sum(np.where(self.state > self.L, self.state-self.L, 0))
+        pressure_contrib *= box_k/4/self.L
         return pressure_contrib
 
     def energy(self):
@@ -60,8 +61,9 @@ class System:
 
     @classmethod
     def energy_calculation(self, state:np.ndarray, L:float):
-        energy_contrib = np.sum(1/2*box_k*np.where(state < 0, state, 0)**2) \
-            + np.sum(1/2*box_k*(np.where(state > L, state, 0) - L)**2)
+        energy_contrib = np.sum(np.where(state < 0, state**2, 0)) \
+                       + np.sum(np.where(state > L, state**2, 0) - L)
+        energy_contrib *= 1/2*box_k
         return energy_contrib
 
 
