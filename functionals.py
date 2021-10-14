@@ -55,7 +55,6 @@ def jitted_explore(initial_state: np.ndarray, L:float, iterations: int) -> Tuple
     def jump(state):
         next_state = state + np.random.normal(0, jump_scale, np.shape(state))
         return next_state
->>>>>>> hyper
 
     def goto_next(state):
         energy = jitted_energy(state, L)
