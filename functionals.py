@@ -14,37 +14,49 @@ beta = 1 / (k_b * T)
 box_k = 50*k_b*T
 box_length = 1
 
-hardcore_diameter = 1e-3
+hardcore_diameter = 5e-2
 hardcore_pot = 1000 * k_b * T
 
 jump_scale = 0.01
 
-N = 1000
+N = 100
 
 @njit()
-def hyper_pressure(state: np.ndarray, L: float):
+def jitted_pressure(state: np.ndarray, L: float):
     pressure_contrib = np.sum(np.where(state < 0, -state, 0)) + \
                        np.sum(np.where(state > L, state - L, 0))
     pressure_contrib *= box_k / L / 4
     return pressure_contrib
 
 @njit()
-def hyper_energy(state: np.ndarray, L: float):
-    energy_contrib:float = 1/2*box_k*np.sum(np.where(state < 0, state**2, 0)) \
-        + 1/2*box_k*np.sum(np.where(state > L, (state-L)**2, 0))
+def hardcore_energy(state: np.ndarray):
+    particle_amt = len(state)
+    energy_contrib = 0.0
+    for i in range(particle_amt):
+        for j in range(i,particle_amt):
+            energy_contrib += hardcore_pot if np.sum(state[i]*state[j]) < hardcore_diameter else 0
     return energy_contrib
 
 @njit()
-def hyper_plow(initial_state: np.ndarray, L:float, iterations: int) -> np.ndarray:
+def box_energy(state: np.ndarray, L: float):
+    energy_contrib: float = 1 / 2 * box_k * np.sum(np.where(state < 0, state ** 2, 0)) \
+                            + 1 / 2 * box_k * np.sum(np.where(state > L, (state - L) ** 2, 0))
+    return energy_contrib
 
+@njit()
+def jitted_energy(state: np.ndarray, L: float):
+    return hardcore_energy(state) + box_energy(state, L)
+
+@njit()
+def jitted_explore(initial_state: np.ndarray, L:float, iterations: int) -> Tuple[np.ndarray, List[np.ndarray]]:
     def jump(state):
         next_state = state + np.random.normal(0, jump_scale, np.shape(state))
         return next_state
 
     def goto_next(state):
-        energy = hyper_energy(state, L)
+        energy = jitted_energy(state, L)
         proposed_next = jump(state)
-        delta_energy = hyper_energy(proposed_next, L) - energy
+        delta_energy = jitted_energy(proposed_next, L) - energy
         if delta_energy < 0 or np.random.random() < np.exp(-beta * delta_energy):
             state = proposed_next
         return state
@@ -53,9 +65,9 @@ def hyper_plow(initial_state: np.ndarray, L:float, iterations: int) -> np.ndarra
     state = initial_state
     for i in range(iterations):
         state = goto_next(state)
-        pressures[i] = hyper_pressure(state, L)
+        pressures[i] = jitted_pressure(state, L)
 
-    return pressures
+    return state, [pressures]
 
 class System:
     state: np.ndarray
@@ -82,29 +94,31 @@ class System:
 
     def goto_next(self):
         proposed_next = self.jump()
-        delta_energy = hyper_energy(proposed_next, self.L) - self.energy()
+        delta_energy = jitted_energy(proposed_next, self.L) - self.energy()
         if delta_energy < 0 or np.random.random() < np.exp(-beta * delta_energy):
             self.state = proposed_next
 
-    def plow(self, iterations: int):
-        return hyper_plow(self.state, self.L, iterations)
+    def explore(self, iterations: int):
+        state, values = jitted_explore(self.state, self.L, iterations)
+        self.state = state
+        return values
 
     def pressure(self) -> float:
-        return hyper_pressure(self.state, self.L)
+        return jitted_pressure(self.state, self.L)
 
     def energy(self):
-        return hyper_energy(self.state, self.L)
+        return jitted_energy(self.state, self.L)
 
 
 
 
 if __name__ == "__main__":
     fig, ax = plt.subplots(1, 1)
-    b_ls = np.linspace(0.2, 2, 30)
+    b_ls = np.linspace(0.2, 2, 1)
     avg_pressures = []
-    for b_l in np.linspace(0.2, 2, 30):
+    for b_l in b_ls:
         sys = System(N, b_l)
-        pressures = sys.plow(10000)
+        pressures = sys.explore(iterations=100000)[0]
         curve: Line2D
         curve, = ax.plot(pressures, label=f"L={b_l}")
         avg_pressure = np.average(pressures)
