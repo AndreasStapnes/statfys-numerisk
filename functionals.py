@@ -107,11 +107,6 @@ class System:
         return values
 
     def pressure(self) -> float:
-        pressure_contrib = np.sum(self.L*np.where(self.state < 0, -self.state, 0)) \
-                         + np.sum(np.where(self.state > self.L, self.state-self.L, 0))
-        pressure_contrib *= box_k/4/self.L
-        return pressure_contrib
-=======
         return jitted_pressure(self.state, self.L)
 
     def energy(self):
@@ -131,7 +126,7 @@ if __name__ == "__main__":
     avg_pressures = []
     for b_l in b_ls:
         sys = System(N, b_l)
-        pressures = sys.explore(iterations=100000)[0]
+        pressures = sys.explore(iterations=1000)[0]
         curve: Line2D
         curve, = ax.plot(pressures, label=f"L={b_l}")
         avg_pressure = np.average(pressures)
