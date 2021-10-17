@@ -1,5 +1,6 @@
 import numpy as np
 from typing import Callable
+from functionals import stateFunctions
 
 
 
@@ -13,25 +14,21 @@ class System:
     pressure: Callable[[np.ndarray], float]
     energy: Callable[[np.ndarray], float]
 
-    def __init__(self, particle_amt: float, L: float, **kwargs): ...
+    def __init__(self, particle_amt: int, L: float, state_functions: stateFunctions, **kwargs): ...
 
-    def jump(self):
+    def traverse(self, iterations: int):
         """
-        Generate a new random state by tanking a randomized step from the current state
-        :return: float-np.ndarray of shape state
+        Jitted method of performing multiple goto_next-steps, simultaneously moving all particles
+        'iterations' number of times
+        :param iterations: int; iterations to perform
+        :return: [list-of-pressure-values,]
         """
-
-
-    def goto_next(self):
-        """
-        Manually aquire to next state
-        :return: float-np.ndarray of shape state
-        """
-        ...
 
     def explore(self, iterations: int):
         """
-        Jitted method of performing multiple goto_next-steps
-        :param iterations: Iterations to perform
-        :return: [list-of-pressure-values,]
+        Jitted method of performing multiple goto_next-steps, moving a single, randomly selected
+        particle at a time
+        :param iterations: int; iterations to perform
+        :return:
         """
+        ...

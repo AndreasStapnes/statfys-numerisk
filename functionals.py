@@ -17,6 +17,10 @@ class stateFunctions:
     hardcore_energy: Callable[[np.ndarray], float]
     box_energy: Callable[[np.ndarray], float]
     box_and_hardcore_energy: Callable[[np.ndarray], float]
+    single_particle_pressure: Callable[[np.ndarray, int], float]
+    single_particle_box: Callable[[np.ndarray, int], float]
+    single_particle_hardcore_energy: Callable[[np.ndarray, int], float]
+    single_particle_box_and_hardcore_energy: Callable[[np.ndarray, int], float]
 
     def __init__(self, L: float, box_k: float, **kwargs):
         self.L = L
@@ -31,8 +35,17 @@ class stateFunctions:
         return {ENERGY.HARDCORE_ENERGY: self.hardcore_energy,
                 ENERGY.BOX_ENERGY: self.box_energy,
                 ENERGY.HARDCORE_AND_BOX_ENERGY: self.box_and_hardcore_energy}[self.energy_type]
+
     def get_pressure(self) -> Callable[[np.ndarray], float]:
         return self.pressure
+
+    def get_single_particle_energy(self) -> Callable[[np.ndarray, int], float]:
+        return {ENERGY.HARDCORE_ENERGY: self.single_particle_hardcore_energy,
+                ENERGY.BOX_ENERGY: self.single_particle_box_energy,
+                ENERGY.HARDCORE_AND_BOX_ENERGY: self.single_particle_box_and_hardcore_energy}[self.energy_type]
+
+    def get_single_particle_pressure(self) -> Callable[[np.ndarray, int], float]:
+        return self.single_particle_pressure
 
     def compile(self):
         L = self.L
@@ -46,13 +59,26 @@ class stateFunctions:
             return pressure_contrib
 
         @njit()
+        def single_particle_pressure(state:np.ndarray, i: int):
+            return pressure(state[i])
+
+        @njit()
         def hardcore_energy(state: np.ndarray) -> float:
             particle_amt = len(state)
             energy_contrib = 0.0
             for i in range(particle_amt):
-                for j in range(i, particle_amt):
-                    energy_contrib += hardcore_pot if np.sum(state[i] * state[j]) < hardcore_diameter else 0
+                for j in range(i+1, particle_amt):
+                    energy_contrib += hardcore_pot if np.linalg.norm(state[i] - state[j]) < hardcore_diameter else 0
             return energy_contrib
+
+        @njit()
+        def single_particle_hardcore_energy(state: np.ndarray, i: int) -> float:
+            energy_contrib = 0.0
+            particle_i = state[i]
+            for j in range(len(state)):
+                energy_contrib += hardcore_pot if np.linalg.norm(particle_i - state[j]) < hardcore_diameter else 0
+            return energy_contrib
+
 
         @njit()
         def box_energy(state: np.ndarray) -> float:
@@ -61,13 +87,26 @@ class stateFunctions:
             return energy_contrib
 
         @njit()
+        def single_particle_box_energy(state: np.ndarray, i: int) -> float:
+            return box_energy(state[i])
+
+        @njit()
         def box_and_hardcore_energy(state: np.ndarray) -> float:
             return box_energy(state) + hardcore_energy(state)
+
+        @njit()
+        def single_particle_box_and_hardcore_energy(state: np.ndarray, i: int) -> float:
+            return single_particle_box_energy(state, i) + single_particle_hardcore_energy(state, i)
 
         self.pressure = pressure
         self.hardcore_energy = hardcore_energy
         self.box_energy = box_energy
         self.box_and_hardcore_energy = box_and_hardcore_energy
+        self.single_particle_pressure = single_particle_pressure
+        self.single_particle_box_energy = single_particle_box_energy
+        self.single_particle_hardcore_energy = single_particle_hardcore_energy
+        self.single_particle_box_and_hardcore_energy = single_particle_box_and_hardcore_energy
+
 
 
 

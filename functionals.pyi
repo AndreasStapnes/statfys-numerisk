@@ -14,6 +14,10 @@ class stateFunctions:
     hardcore_energy: Callable[[np.ndarray], float]
     box_energy: Callable[[np.ndarray], float]
     box_and_hardcore_energy: Callable[[np.ndarray], float]
+    single_particle_pressure: Callable[[np.ndarray, int], float]
+    single_particle_box: Callable[[np.ndarray, int], float]
+    single_particle_hardcore_energy: Callable[[np.ndarray, int], float]
+    single_particle_box_and_hardcore_energy: Callable[[np.ndarray, int], float]
 
     def __init__(self, L: float, box_k: float, **kwargs):
         """
@@ -36,5 +40,11 @@ class stateFunctions:
     def get_energy(self) -> Callable[[np.ndarray], float]:
         ...
 
+    def get_single_particle_energy(self) -> Callable[[np.ndarray, int], float]:
+        ...
+
     def get_pressure(self) -> Callable[[np.ndarray], float]:
+        ...
+
+    def get_single_particle_pressure(self) -> Callable[[np.ndarray, int], float]:
         ...
