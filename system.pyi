@@ -24,7 +24,7 @@ class System:
         :return: [list-of-pressure-values,]
         """
 
-    def explore(self, iterations: int):
+    def explore(self, iterations: int, log_interval: int = 1):
         """
         Jitted method of performing multiple goto_next-steps, moving a single, randomly selected
         particle at a time
