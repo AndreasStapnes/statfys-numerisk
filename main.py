@@ -1,18 +1,24 @@
 import matplotlib.pyplot as plt
-from functionals import System
 import numpy as np
 from matplotlib.lines import Line2D
 from matplotlib.axes import Axes
-from constants import *
+from system import System
+from constants import N, box_k
 
+from functionals import stateFunctions, ENERGY
 
 if __name__ == "__main__":
     fig, ax = plt.subplots(1, 1)
     b_ls = np.linspace(0.2, 2, 1)
     avg_pressures = []
     for b_l in b_ls:
-        sys = System(N, b_l)
-        pressures = sys.explore(iterations=1000)[0]
+        state_funcs = stateFunctions(b_l, box_k, energy_type=ENERGY.HARDCORE_AND_BOX_ENERGY)
+        sys = System(N, b_l,
+                     energy=state_funcs.get_energy(),
+                     pressure=state_funcs.get_pressure(),
+                     jump_scale=0.01)
+
+        pressures = sys.explore(iterations=100000)[0]
         curve: Line2D
         curve, = ax.plot(pressures, label=f"L={b_l}")
         avg_pressure = np.average(pressures)
