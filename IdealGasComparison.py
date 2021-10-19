@@ -5,10 +5,17 @@ import matplotlib.pyplot as plt
 from constants import box_k, k_b, T
 
 
+<<<<<<< HEAD
 lower_l_lim = 0.1
 upper_l_lim = 2
 stabilization_iterations = 100
 average_iterations = 5000
+=======
+lower_l_lim = 0.03
+upper_l_lim = 2
+stabilization_iterations = 100000
+average_iterations = 500000
+>>>>>>> a3ad53ad505d7c4f866ee207acd93f23a68db2a0
 
 particle_amt = 500
 
