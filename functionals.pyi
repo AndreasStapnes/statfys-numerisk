@@ -7,6 +7,7 @@ class ENERGY(Enum):
     HARDCORE_ENERGY         :int = 1
     BOX_ENERGY              :int = 2
     HARDCORE_AND_BOX_ENERGY :int = 3
+    LJ_AND_BOX_ENERGY: int = 4
 
 
 class stateFunctions:
@@ -14,10 +15,12 @@ class stateFunctions:
     hardcore_energy: Callable[[np.ndarray], float]
     box_energy: Callable[[np.ndarray], float]
     box_and_hardcore_energy: Callable[[np.ndarray], float]
+    box_and_lj_energy: Callable[[np.ndarray], float]
     single_particle_pressure: Callable[[np.ndarray, int], float]
-    single_particle_box: Callable[[np.ndarray, int], float]
+    single_particle_box_energy: Callable[[np.ndarray, int], float]
     single_particle_hardcore_energy: Callable[[np.ndarray, int], float]
     single_particle_box_and_hardcore_energy: Callable[[np.ndarray, int], float]
+    single_particle_box_and_lj_energy: Callable[[np.ndarray, int], float]
 
     def __init__(self, L: float, box_k: float, **kwargs):
         """

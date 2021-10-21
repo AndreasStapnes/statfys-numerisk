@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from constants import box_k, k_b, T
 
 
-lower_l_lim = 0.1
+lower_l_lim = 0.03
 upper_l_lim = 2
 stabilization_iterations = 100000
 average_iterations = 500000

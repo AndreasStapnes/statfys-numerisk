@@ -8,4 +8,7 @@ hardcore_diameter = 0e-2
 hardcore_pot = 1000 * k_b * T
 
 N = 1000
+
+epsilon = 1
+a = 0.1
 #jump_scale = 0.01
