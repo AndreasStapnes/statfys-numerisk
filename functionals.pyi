@@ -7,7 +7,7 @@ class ENERGY(Enum):
     HARDCORE_ENERGY         :int = 1
     BOX_ENERGY              :int = 2
     HARDCORE_AND_BOX_ENERGY :int = 3
-    LJ_AND_BOX_ENERGY: int = 4
+    LJ_AND_BOX_ENERGY       :int = 4
 
 
 class stateFunctions:
