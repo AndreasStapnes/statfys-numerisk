@@ -16,13 +16,8 @@ class System:
 
     def __init__(self, particle_amt: int, L: float, state_functions: stateFunctions, **kwargs): ...
 
-    def traverse(self, iterations: int):
-        """
-        Jitted method of performing multiple goto_next-steps, simultaneously moving all particles
-        'iterations' number of times
-        :param iterations: int; iterations to perform
-        :return: [list-of-pressure-values,]
-        """
+    def reset(self, L: float=None, recompile: bool=False):
+        ...
 
     def explore(self, iterations: int, log_interval: int = 1):
         """
