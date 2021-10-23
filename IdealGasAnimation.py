@@ -8,26 +8,30 @@ from matplotlib.lines import Line2D
 from typing import List
 from matplotlib.axes import Axes
 
-plot_amt = 100      #antall partikler
+plot_amt = 200      #antall partikler
 
 anim_iters = 1000   #Iterasjoner mellom hvert plot
-anim_frames = 300   #Antall frames
+anim_frames = 150   #Antall frames
+
+L=3
 
 if __name__ == "__main__":
 
     #Plotting a single system
 
     state_fcns = stateFunctions(box_k, energy_type=ENERGY.LJ_AND_BOX_ENERGY)
-    sys = System(plot_amt, 1, state_fcns, jump_scale=0.01, logEnergy=False)
+    sys = System(plot_amt, L, state_fcns, jump_scale=0.3, logEnergy=False)
     ax: Axes
     fig, ax = plt.subplots(1,1)
-    data_storage = [[[x_data],[y_data]] for x_data, y_data in sys.state]
+    data_storage = [elem for x_data, y_data in sys.state for elem in [[x_data], [y_data]]]
     curves:List[Line2D] = ax.plot(*data_storage)
     ax.set_aspect("equal")
-    ax.set_xlim([-0.2, 1.2])
-    ax.set_ylim([-0.2, 1.2])
-    ax.axvline(1, color="k"); ax.axvline(0, color="k")
-    ax.axhline(0, color="k"), ax.axhline(1, color="k")
+    ax.set_xlim([-0.2, L+0.2])
+    ax.set_ylim([-0.2, L+0.2])
+    ax.axvline(L, color="k"); ax.axvline(0, color="k")
+    ax.axhline(0, color="k"), ax.axhline(L, color="k")
+    for curve in curves:
+        curve.set_marker("x")
 
 
     def animate(*args):
@@ -35,12 +39,12 @@ if __name__ == "__main__":
         print("*", end="")
         ax.set_title(f"p={pressure[0]:.3g} pa")
         for enum, (x_data, y_data) in enumerate(sys.state):
-            data_storage[enum][0].append(x_data)
-            data_storage[enum][1].append(y_data)
-            data_storage[enum][0] = data_storage[enum][0][-10:]
-            data_storage[enum][1] = data_storage[enum][1][-10:]
+            data_storage[2*enum].append(x_data)
+            data_storage[2*enum+1].append(y_data)
+            data_storage[2*enum] = data_storage[2*enum][-1:]
+            data_storage[2*enum+1] = data_storage[2*enum+1][-1:]
         for enum, line in enumerate(curves):
-            line.set_data(data_storage[enum])
+            line.set_data(data_storage[2*enum], data_storage[2*enum+1])
         return curves
     anim = FuncAnimation(fig, animate, anim_frames)
     anim.save("anim.gif", fps=30)
