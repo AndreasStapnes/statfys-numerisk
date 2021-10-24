@@ -20,7 +20,7 @@ if __name__ == "__main__":
     #Plotting a single system
 
     state_fcns = stateFunctions(box_k, energy_type=ENERGY.LJ_AND_BOX_ENERGY)
-    sys = System(plot_amt, L, state_fcns, jump_scale=0.3, logEnergy=False)
+    sys = System(plot_amt, L, state_fcns, jump_scale=0.1, logEnergy=False)
     ax: Axes
     fig, ax = plt.subplots(1,1)
     data_storage = [elem for x_data, y_data in sys.state for elem in [[x_data], [y_data]]]
