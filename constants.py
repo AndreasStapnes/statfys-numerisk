@@ -1,7 +1,7 @@
 import numpy as np
 k_b = 1.38e-23          #The boltzmann constant
 #T = 293                 #Example temperature (in Kelvin)
-beta = 1.1     #The inverse-temperature-constant for the example-temp
+beta = 5.1     #The inverse-temperature-constant for the example-temp
 T = 1/(beta*k_b)
 
 box_k = 300       #Spring-constant for box-walls
